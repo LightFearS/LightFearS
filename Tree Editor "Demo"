@@ -1,0 +1,39 @@
+using TreeEditor;
+using UnityEngine;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+
+namespace TreeEditor
+{
+    public class EditorTree : MonoBehaviour
+    {
+        [Header("Parametrs")]
+        [Range(5, 1000)] public float SpeedForceTree = 5;
+        public GameObject Tree;
+
+        [Space(height: 5f)]
+        private Vector3 TreeVector;
+        [Range(10, 1000)] public float SpeedDeadTree = 10;
+
+        #if UNITY_EDITOR
+        [ContextMenu(itemName: "Position tree")]
+        public void PositionTree()
+        {
+            if (Physics.Raycast(origin: transform.position + Vector3.up * 100, direction: Vector3.down, out var hit, maxDistance: 200,
+                LayerMask.GetMask(layerNames: "Ground")))
+            {
+                Undo.RecordObject(transform, name: "Position tree");
+
+                transform.position = hit.point - hit.normal * 1f;
+
+                Vector3 normal = hit.normal;
+
+                Vector3 fwd = Vector3.Cross(lhs: normal, rhs: Vector3.right).normalized;
+                fwd = Quaternion.AngleAxis(angle: Random.Range(0, 360), normal) * fwd;
+                transform.rotation = Quaternion.LookRotation(forward: fwd, upwards: normal);
+            }
+        }
+    }
+}
+#endif
